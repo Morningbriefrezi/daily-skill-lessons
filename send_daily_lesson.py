@@ -4,14 +4,12 @@ from datetime import datetime
 from telegram import Bot
 from openai import OpenAI
 import pytz
+import httpx
 
 # Get environment variables
 TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
-
-# Initialize OpenAI client
-client = OpenAI(api_key=OPENAI_API_KEY)
 
 # Tbilisi timezone
 TBILISI_TZ = pytz.timezone('Asia/Tbilisi')
@@ -59,6 +57,13 @@ NU გაიმეორო უნარები ხშირად.
 მიაწოდე ზუსტად ერთი გაკვეთილი."""
 
     try:
+        # Initialize OpenAI client with explicit http_client
+        http_client = httpx.Client()
+        client = OpenAI(
+            api_key=OPENAI_API_KEY,
+            http_client=http_client
+        )
+        
         response = client.chat.completions.create(
             model="gpt-4o",
             messages=[
@@ -75,6 +80,7 @@ NU გაიმეორო უნარები ხშირად.
             max_tokens=1000
         )
         
+        http_client.close()
         return response.choices[0].message.content
     
     except Exception as e:
