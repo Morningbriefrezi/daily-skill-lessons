@@ -1,0 +1,32 @@
+name: Daily Skill Lesson
+
+on:
+  schedule:
+    # Send once daily at 09:00 Tbilisi time (05:00 UTC)
+    - cron: '0 5 * * *'
+  workflow_dispatch:  # Allows manual trigger
+
+jobs:
+  send-lesson:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        pip install python-telegram-bot==21.0 openai==1.12.0 pytz==2024.1
+    
+    - name: Send daily skill lesson
+      env:
+        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      run: |
+        python send_daily_lesson.py
